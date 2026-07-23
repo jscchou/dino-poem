@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dino Poem — Jasmine S.C. Chou</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ---- page-specific styling for Dino Poem (uses the shared variables) ---- */
+  .puzzle-hero { margin: 0 0 3rem; }
+  .puzzle-box {
+    position: relative;
+    background: var(--frame);
+    padding: clamp(1.8rem, 4vw, 2.6rem);
+    overflow: hidden;
+  }
+  .puzzle-scroll { overflow-x: auto; text-align: center; }
+  .puzzle-grid {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    line-height: 1.7;
+    letter-spacing: 0.06em;
+    white-space: pre;
+    display: inline-block;
+    margin: 0;
+    text-align: left;
+    color: var(--ink);
+  }
+  .puzzle-cap {
+    font-family: var(--serif);
+    font-style: italic;
+    text-align: center;
+    color: var(--ink-soft);
+    margin: 1.2rem auto 0;
+    max-width: 42ch;
+  }
+  .reveal { text-align: center; margin-top: 1.4rem; }
+  .reveal summary {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: inline-block;
+    list-style: none;
+  }
+  .reveal summary::-webkit-details-marker { display: none; }
+  .reveal summary::before { content: "\25B8\00A0"; }
+  .reveal[open] summary::before { content: "\25BE\00A0"; }
+  .reveal summary:hover { color: var(--ink); }
+  .poem {
+    font-family: var(--serif);
+    font-style: italic;
+    line-height: 1.85;
+    margin-top: 1rem;
+  }
+
+  .codeblock {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+    background: var(--frame);
+    padding: 1.1rem 1.3rem;
+    margin: 1.4rem 0;
+    color: var(--ink);
+  }
+  .codeblock .c { color: var(--ink-faint); }
+
+  .rhyme-pairs {
+    list-style: none;
+    padding: 0;
+    margin: 1.4rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.6rem;
+  }
+  .rhyme-pairs li {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    border: 1px solid var(--line);
+    padding: 0.32em 0.7em;
+    white-space: nowrap;
+  }
+
+  .demo { margin-top: 1.6rem; }
+  .demo-btn {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.76rem;
+    padding: 0.72em 1.4em;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .demo-btn:hover { background: var(--ink); color: var(--bg); }
+  .demo-btn:disabled { opacity: 0.4; cursor: default; }
+  .demo-status {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    margin: 0.9rem 0 0;
+    min-height: 1em;
+  }
+  .demo-out { margin-top: 1.2rem; }
+  .demo-answer {
+    font-family: var(--serif);
+    font-style: italic;
+    line-height: 1.85;
+    margin-top: 1rem;
+  }
+  .demo-answer .lbl {
+    display: block;
+    font-family: var(--mono);
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.4rem;
+  }
+
+  .proj-footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="proj-wrap">
+
+  <header class="proj-header">
+    <a class="back" href="https://jscchou.github.io/portfoliosite/">Jasmine S.C. Chou</a>
+    <ul class="proj-index">
+      <li><a href="https://jscchou.github.io/portfoliosite/" target="_blank" rel="noopener">See more work &#8599;</a></li>
+    </ul>
+  </header>
+
+  <section class="proj-top">
+    <h1 class="proj-title">Dino Poem</h1>
+    <div class="proj-meta">
+      <div class="row"><span class="k">Year:</span> 2024</div>
+      <div class="row"><span class="k">Medium:</span> Creative Coding, Generative Poetry</div>
+      <div class="row"><span class="k">Tools:</span> Python, Tracery, p5.js, Jupyter</div>
+      <div class="row"><span class="k">Role:</span> Concept, Writing, Programming</div>
+      <p class="desc">A small machine that writes tiny dinosaur poems, somewhere between
+         nonsense and tenderness.</p>
+    </div>
+  </section>
+
+  <!-- HERO PUZZLE — one real output from the notebook (grid with the poem hidden inside) -->
+  <section class="puzzle-hero">
+    <div class="puzzle-box">
+      <span class="mark tl"></span><span class="mark tr"></span>
+      <span class="mark bl"></span><span class="mark br"></span>
+      <div class="puzzle-scroll"><pre class="puzzle-grid">G Z P Z Q F Q Q H Z A A L S N C E Z Y H H W B N X Y N T O B K R P W D U L A E X C D Z A O F R X
+K M P E F V B P H C Y G G V Z V Y Y S X C D R P R M G K E R N J L O Q M K P M I A C F W W P A P
+C R T X Q H S T K R T D F V F U L K L Y T J H D F C F Y N L F V B V Q V H N F X S A L P Q M V H
+H F R C O Z N Y X P B J B I V J B N H F M C K U E E X X P B I E U Q X P A G L Z E L T Y N P S P
+J E R S I E Y X A M V E W A I S K U H S N I V M Y Z E E E D M D F A U O Z E C D U J E J R K M P
+T F F B R A V E L I T T L E R E X C R E P T A W A Y B E F O R E T H E D A W N F M G W X R Y B T
+X Y B Z A M O C T H R O U G H T W I S T E D F E R N S A N D B O L D L Y M A R C H I N G O N M Y
+F W H I W T K X B T H E F O R E S T S H O O K W I T H O N E T R E M E N D O U S R O A R H M E J
+Q Z R P S D R T B A N D R E X F O R G O T E A C H S T E P H E T O O K B E F O R E Q T X K Q J J
+W T Q Y R G C T K G L C K V N D C U C U Z Y O Q T A V U W O P Q Q M M C H A B V N B H I W S M X
+N O Z H M M K P H U U C B P F P L W T G Y O U U Y T V X T W V I H P P M J T M Q W A F K G J M W
+E C R F C Q J T M X X O D F W N G V K L U S V G I C A K Q I E V Q G H T W I W M F M O M N O T V
+I V F V M T I D G G B L Z U W L A C Q S B M T O W O H A R E D J G O L A L F E S Z N Q B J G N M
+R H H S Z S O Z A V S C C N X Y V G E B P Q T R T P P V Z V K E I E L J J U U A Z C V C F Q D V</pre></div>
+    </div>
+    <p class="puzzle-cap">Do an excavation to find the hidden T-rex adventure.</p>
+    <details class="reveal">
+      <summary>Reveal the poem</summary>
+      <p class="poem">Brave Little Rex crept away before the dawn<br>
+        through twisted ferns and boldly marching on<br>
+        The forest shook with one tremendous roar<br>
+        and Rex forgot each step he took before</p>
+    </details>
+  </section>
+
+  <article class="proj-body">
+    <p>Dino Poem is an extended study of children&rsquo;s literature: a small system that
+       writes short, rhyming poems about the adventures of a young T-rex &mdash; and then
+       hides each finished poem inside a word-search puzzle.</p>
+
+    <h2>Concept</h2>
+    <p>The project grew out of an earlier assignment, where I tried to take apart the text
+       of <em>Peter Pan</em> and build an algorithmic grammar for humor. It didn&rsquo;t
+       quite work &mdash; I realized I would first need to understand what actually makes a
+       sentence funny, and that children&rsquo;s literature isn&rsquo;t always humorous
+       anyway (the Grimm&rsquo;s fairy tales I remember are pretty dark).</p>
+    <p>So I shifted my focus to children&rsquo;s literature itself. Revisiting picture books
+       I loved as a child &mdash; <em>The Giving Tree</em>, <em>Dad, I Want the Moon</em>,
+       <em>The Very Hungry Caterpillar</em> &mdash; I noticed how much of their playfulness
+       comes from short, rhyming sentences. I read about rhyme schemes (AABB and AABA) and
+       Dr. Seuss, and decided a short rhyming poem would be a fun thing to generate.</p>
+    <p>Because this was a genre study, I didn&rsquo;t want to import an existing text as a
+       corpus. Instead I wrote the poems myself, around the subject that thrilled me most as
+       a child: dinosaurs. Borrowing the narrative shape of <em>Peter Rabbit</em>, I wrote a
+       short story-poem about a young T-rex slipping away on an adventure. Here is the very
+       first one I wrote:</p>
+    <p><em>Mighty Little Rex crept past the gate one day<br>
+       and deep into the Fern Forest made his way<br>
+       Old Spinosaurus let out one great roar<br>
+       and Rex&rsquo;s legs moved faster than before</em></p>
+
+    <h2>Process</h2>
+    <p>The piece came together in two parts: a generator that writes the poems, and a puzzle
+       that hides them.</p>
+    <p><strong>Writing the generator.</strong> I gathered rhyming word pairs and wrote
+       several interchangeable versions of each line, treating the poem&rsquo;s four lines as
+       four beats of the story. The T-rex&rsquo;s name and the adjectives that describe it
+       became their own swappable lists.</p>
+    <p>Building it in Tracery surfaced a problem: Tracery chooses each element independently,
+       so a line ending in &ldquo;day&rdquo; was never guaranteed to land with a line ending
+       in &ldquo;way.&rdquo; The rhymes kept breaking. The rhyming words also carried
+       different meanings &mdash; some about time, some about place &mdash; so the lines had
+       to stay matched in sense as well as in sound.</p>
+    <p>These are the rhyming pairs I settled on:</p>
+    <ul class="rhyme-pairs">
+      <li>day / way</li>
+      <li>dawn / on</li>
+      <li>night / sight</li>
+      <li>hill / still</li>
+      <li>gate / late</li>
+      <li>trail / tale</li>
+      <li>deep / sleep</li>
+      <li>fled / said</li>
+      <li>run / done</li>
+      <li>fear / there</li>
+      <li>roar / before</li>
+      <li>track / back</li>
+    </ul>
+    <p>The fix was to pick a rhyming pair first, then slot it into lines written specifically
+       to carry that pair&rsquo;s meaning. A search pointed me toward nested dictionaries. The
+       outer layer holds the swappable <code>name</code> and <code>adj</code> lists plus two
+       groups of rhyme pairs &mdash; <code>a_pairs</code> for the first two lines,
+       <code>b_pairs</code> for the last two:</p>
+    <pre class="codeblock">rules = {
+    "name": [...],
+    "adj": [...],
+    "a_pairs": [...],
+    "b_pairs": [...],
+}</pre>
+    <p>Each pair is its own little dictionary that keeps the two rhyme words together with the
+       candidate lines written to end on them:</p>
+    <pre class="codeblock">"a_pairs": [
+    {
+        "a1": "day",
+        "a2": "way",
+        "line1": [...],   <span class="c"># candidate sentences ending in {A1}</span>
+        "line2": [...],
+    },
+    {
+        "a1": "dawn",
+        "a2": "on",
+        "line1": [...],
+        "line2": [...],
+    },
+]</pre>
+    <p>From there, <code>generate_poem()</code> picks one <code>a_pair</code> and one
+       <code>b_pair</code> at random, pulls one candidate line from each of the four slots,
+       expands them with Tracery (filling in a random name and adjective), and finally
+       substitutes the rhyme words back in at the line ends &mdash; so the rhyme is guaranteed
+       every time.</p>
+
+    <p><strong>Hiding it in a puzzle.</strong> While researching children&rsquo;s literature
+       I kept running into reading-and-writing games, and the word search caught my eye: it
+       looked like a grid I could build by counting, which connected back to grid and pixel
+       exercises from an earlier ICM class.</p>
+    <p>Thinking of the puzzle as a grid, I rebuilt that counting logic in Python. It
+       wasn&rsquo;t a direct port of my old p5.js sketches &mdash; in p5, x and y already mean
+       a pixel&rsquo;s position, but here i and j are just numbers, so I had to construct
+       position and direction myself. With help from a classmate and more searching, I wrote
+       functions that fill a row with random letters, and that hide one line of the poem at a
+       random offset inside a row of noise. Stacking noise rows above and below the hidden
+       lines turns the whole thing into a &ldquo;find the poem&rdquo; puzzle, with the answer
+       printed underneath.</p>
+
+    <p>You can run the whole thing here &mdash; every press writes a new poem and buries it in
+       a fresh grid:</p>
+    <div class="demo">
+      <button class="demo-btn" id="demo-btn" type="button">Generate a poem &amp; puzzle</button>
+      <p class="demo-status" id="demo-status"></p>
+      <div class="demo-out">
+        <div class="puzzle-box">
+          <span class="mark tl"></span><span class="mark tr"></span>
+          <span class="mark bl"></span><span class="mark br"></span>
+          <div class="puzzle-scroll"><pre class="puzzle-grid" id="demo-grid">Press &ldquo;Generate&rdquo; to build a fresh puzzle.</pre></div>
+        </div>
+        <p class="demo-answer" id="demo-answer"></p>
+      </div>
+    </div>
+
+    <h2>Reflection</h2>
+    <p>For much of the semester I was fixated on making meaning out of messy text. As a
+       scriptwriter who works with narrative prose every day, I&rsquo;m drawn to the unspoken
+       parts of dialogue as much as the written ones, and I kept wondering whether the
+       meaning buried in the unsaid could be coded at all.</p>
+    <p>Designing this Tracery rule convinced me that making meaning still takes a great deal
+       of deliberate human input &mdash; you have to be very intentional about the
+       &ldquo;said&rdquo; for the &ldquo;unsaid&rdquo; to come through. Tracery is good at
+       holding a strict structure in place, which left me thinking about a question we kept
+       returning to in class: whether meaning is an essential part of computational text.</p>
+  </article>
+
+  <footer class="proj-footer">
+    <span>&copy;2037 Copyrights Etc.</span>
+    <span class="proj-footer-links">
+      <a href="https://notebooksharing.space/view/19e821a4caebe4b3638062f6783f281e55113319c9b802f55dad942899c90f23#displayOptions=" target="_blank" rel="noopener">View the full Jupyter notebook</a>
+      <a href="https://jscchou.github.io/portfoliosite/" target="_blank" rel="noopener">Jasmine&rsquo;s portfolio &#8599;</a>
+    </span>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  /* Poem + puzzle rules, transcribed faithfully from the notebook.
+     Shared by both the Python (Pyodide) engine and the JS fallback. */
+  const RULES = {
+    "name": ["Dino Rex", "Little Rex"],
+    "adj": ["Mighty", "Bold", "Bored", "Brave"],
+    "a_pairs": [
+      { "a1": "day", "a2": "way",
+        "line1": ["#adj# #name# crept past the gate one {A1}", "#adj# #name# wandered off one sleepy {A1}", "#adj# #name# slipped out to roam one {A1}"],
+        "line2": ["and deep into the Fern Forest made his {A2}", "and tiptoed down the dark and twisting {A2}", "past every warning sign along the {A2}"] },
+      { "a1": "dawn", "a2": "on",
+        "line1": ["#adj# #name# slipped out at break of {A1}", "#adj# #name# crept away before the {A1}"],
+        "line2": ["while Mama slept, he charged and carried {A2}", "and stomped the Fern Forest, bravely crashing {A2}", "through twisted ferns and boldly marching {A2}"] },
+      { "a1": "night", "a2": "sight",
+        "line1": ["#adj# #name# crept out beneath the {A1}", "#adj# #name# snuck out before the {A1}", "#adj# #name# vanished in the dead of {A1}"],
+        "line2": ["and Spinosaurus lurked just out of {A2}", "and something in the dark was quite a {A2}", "and shadows hid a most alarming {A2}"] },
+      { "a1": "hill", "a2": "still",
+        "line1": ["#adj# #name# went marching up the {A1}", "#adj# #name# climbed to the top of Fern-Frond {A1}"],
+        "line2": ["where all the world was cold and {A2}", "where even brave explorers dared stand {A2}", "past every twisted tree and every shadow {A2}"] },
+      { "a1": "gate", "a2": "late",
+        "line1": ["#adj# #name# squeezed beneath the mossy {A1}", "#adj# #name# crept beneath the old forbidden {A1}"],
+        "line2": ["and wandered in the forest, dark and {A2}", "he'd heard the warnings — but it was too {A2}", "the hour had passed, the sun had set too {A2}"] },
+      { "a1": "trail", "a2": "tale",
+        "line1": ["#adj# #name# set off along a narrow {A1}", "#adj# #name# followed one forgotten {A1}"],
+        "line2": ["to find the Forest monster of old {A2}", "the kind that every dino knew by {A2}", "that every little dino whispered as a {A2}"] },
+      { "a1": "deep", "a2": "sleep",
+        "line1": ["#adj# #name# crept in while all was {A1}", "#adj# #name# tiptoed where the tall ferns grow {A1}"],
+        "line2": ["while Mama Rex was lost in heavy {A2}", "and left her snoring, tangled deep in {A2}", "into a world beyond a dreamer's {A2}"] }
+    ],
+    "b_pairs": [
+      { "b1": "fled", "b2": "said",
+        "line3": ["Old Spinosaurus snapped and Rex {B1}", "Rex dropped his berries, turned his tail, and {B1}", "One roar rang out and Rex {B1}"],
+        "line4": ["and never touched that forest, just like Mama {B2}", "now believed the words Mama always {B2}", "and every step rang with what Mama {B2}"] },
+      { "b1": "run", "b2": "done",
+        "line3": ["He heard a SNAP and turned to {B1}"],
+        "line4": ["and never went back once the chase was {B2}", "and vowed his forest days were good and {B2}", "and swore the whole adventure had been {B2}"] },
+      { "b1": "fear", "b2": "there",
+        "line3": ["A shadow loomed above him, cold with {B1}", "Two yellow eyes blinked close — he froze with {B1}"],
+        "line4": ["he ran home and vowed to stay right {B2}"] },
+      { "b1": "roar", "b2": "before",
+        "line3": ["Old Spinosaurus let out one great {B1}", "The forest shook with one tremendous {B1}"],
+        "line4": ["and Rex ran faster than he'd run {B2}", "and Rex forgot each step he took {B2}", "and Rex's legs moved faster than {B2}"] },
+      { "b1": "track", "b2": "back",
+        "line3": ["Those heavy footsteps thundered down his {B1}", "He heard the monster gaining on his {B1}"],
+        "line4": ["and raced home and never once looked {B2}", "and ran and ran and never once glanced {B2}"] }
+    ]
+  };
+
+  /* ---------- In-browser JS fallback ----------
+     Faithful to the notebook: the Tracery templates only use #adj# and #name#
+     (no base_english modifiers are applied), so expansion is a straight swap. */
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const randLetter = () => ALPHA[Math.floor(Math.random() * 26)];
+
+  function expandJS(t) {
+    return t.replace("#adj#", pick(RULES.adj)).replace("#name#", pick(RULES.name));
+  }
+  function generatePoemJS() {
+    const ap = pick(RULES.a_pairs), bp = pick(RULES.b_pairs);
+    const lines = [pick(ap.line1), pick(ap.line2), pick(bp.line3), pick(bp.line4)].map(expandJS);
+    let poem = lines.join("\n");
+    return poem.split("{A1}").join(ap.a1).split("{A2}").join(ap.a2)
+               .split("{B1}").join(bp.b1).split("{B2}").join(bp.b2);
+  }
+  const cleanLine = (l) => l.replace(/[^a-zA-Z ]/g, "").toUpperCase().trim();
+  function makePuzzleJS(poem) {
+    const poemLines = poem.split("\n").filter((l) => l.trim()).map(cleanLine);
+    const PADDING = 10, NOISE_ROWS = 5;
+    const longest = Math.max.apply(null, poemLines.map((l) => l.replace(/ /g, "").length));
+    const COLS = longest + PADDING;
+    const noiseRow = () => Array.from({ length: COLS }, randLetter);
+    const poemRow = (line) => {
+      const letters = line.replace(/ /g, ""), wl = letters.length;
+      const offset = Math.floor(Math.random() * (COLS - wl + 1));
+      const row = [];
+      for (let p = 0; p < COLS; p++) row.push((p >= offset && p < offset + wl) ? letters[p - offset] : randLetter());
+      return row;
+    };
+    const grid = [];
+    for (let i = 0; i < NOISE_ROWS; i++) grid.push(noiseRow());
+    poemLines.forEach((l) => grid.push(poemRow(l)));
+    for (let i = 0; i < NOISE_ROWS; i++) grid.push(noiseRow());
+    return grid.map((r) => r.join(" "));
+  }
+  function generateJS() {
+    const poem = generatePoemJS();
+    return { grid: makePuzzleJS(poem), poem: poem.split("\n") };
+  }
+
+  /* ---------- Python engine (Pyodide + your notebook code) ---------- */
+  const PY = `
+import random, re, json
+import tracery
+from tracery.modifiers import base_english
+
+rules = json.loads(r'''${JSON.stringify(RULES)}''')
+
+def expand(template_str):
+    g = tracery.Grammar({**rules, "origin": [template_str]})
+    g.add_modifiers(base_english)
+    return g.flatten("#origin#")
+
+def generate_poem():
+    ap = random.choice(rules["a_pairs"])
+    bp = random.choice(rules["b_pairs"])
+    lines = [
+        random.choice(ap["line1"]),
+        random.choice(ap["line2"]),
+        random.choice(bp["line3"]),
+        random.choice(bp["line4"]),
+    ]
+    processed_lines = [expand(t) for t in lines]
+    raw = "\\n".join(processed_lines)
+    return raw.replace("{A1}", ap["a1"]).replace("{A2}", ap["a2"]).replace("{B1}", bp["b1"]).replace("{B2}", bp["b2"])
+
+def clean_line(line):
+    return re.sub(r"[^a-zA-Z ]", "", line).upper().strip()
+
+def make_puzzle(final_poem):
+    poem_lines = [clean_line(l) for l in final_poem.split("\\n") if l.strip()]
+    PADDING = 10
+    longest = max(len(l.replace(" ", "")) for l in poem_lines)
+    GRID_COLS = longest + PADDING
+    NOISE_ROWS = 5
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    def make_noise_row(width):
+        return [random.choice(alphabet) for _ in range(width)]
+    def make_poem_row(poem_line, width):
+        letters = poem_line.replace(" ", "")
+        word_length = len(letters)
+        offset = random.randint(0, width - word_length)
+        row = []
+        position = 0
+        while position < width:
+            if position >= offset and position < offset + word_length:
+                row.append(letters[position - offset])
+            else:
+                row.append(random.choice(alphabet))
+            position = position + 1
+        return row
+    grid = []
+    for _ in range(NOISE_ROWS): grid.append(make_noise_row(GRID_COLS))
+    for line in poem_lines: grid.append(make_poem_row(line, GRID_COLS))
+    for _ in range(NOISE_ROWS): grid.append(make_noise_row(GRID_COLS))
+    return grid
+
+def run():
+    p = generate_poem()
+    g = make_puzzle(p)
+    return json.dumps({"grid": [" ".join(r) for r in g], "poem": p.split("\\n")})
+`;
+
+  let pyReadyPromise = null;
+  function initPy() {
+    if (pyReadyPromise) return pyReadyPromise;
+    pyReadyPromise = (async () => {
+      if (!window.loadPyodide) {
+        await new Promise((res, rej) => {
+          const s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js";
+          s.onload = res; s.onerror = () => rej(new Error("pyodide load failed"));
+          document.head.appendChild(s);
+        });
+      }
+      const pyodide = await loadPyodide();
+      await pyodide.loadPackage("micropip");
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install("tracery3");
+      pyodide.runPython(PY);
+      return () => JSON.parse(pyodide.runPython("run()"));
+    })();
+    return pyReadyPromise;
+  }
+
+  /* ---------- wire up the button ---------- */
+  const btn = document.getElementById("demo-btn");
+  const status = document.getElementById("demo-status");
+  const gridEl = document.getElementById("demo-grid");
+  const ansEl = document.getElementById("demo-answer");
+  let engine = "python";
+
+  const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  function render(res) {
+    gridEl.textContent = res.grid.join("\n");
+    ansEl.innerHTML = '<span class="lbl">Answer</span>' + res.poem.map(esc).join("<br>");
+  }
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    if (engine === "python") {
+      try {
+        status.textContent = "Loading Python (Pyodide + tracery)… first run takes a few seconds.";
+        const run = await withTimeout(initPy(), 45000);
+        render(run());
+        status.textContent = "Generated by your notebook code, running in the browser via Pyodide.";
+        btn.disabled = false;
+        btn.textContent = "Generate another";
+        return;
+      } catch (e) {
+        engine = "js"; // fall back and stay there
+      }
+    }
+    status.textContent = "Generated in-browser (JavaScript port of your code).";
+    render(generateJS());
+    btn.disabled = false;
+    btn.textContent = "Generate another";
+  });
+})();
+</script>
+</body>
+</html>
